@@ -2,5 +2,8 @@
 .class
 .classpath
 target
+
+results.json
 node_modules
+
 *~
