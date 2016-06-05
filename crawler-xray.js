@@ -1,36 +1,67 @@
-console.log('crawler executando..');
+'use strict'
 
-var Xray = require('x-ray');
+const Xray = require('x-ray');
+const fs = require('fs');
+const uri = "http://ms.olx.com.br/imoveis";
+const fileName = "results.json";
 
-var uri = "http://ms.olx.com.br";
-
-var x = Xray({
+const x = Xray({
   filters: {
-    trim: function (value) {
-      return (typeof value === 'string' ? value.trim().replace(/[\n\t\r]/g,"") : value);
+    clearString: function (value) {
+      return clearString(value);
+    },
+    number: function (value) {
+      return number(value);
+    },
+    amount: function (value) {
+      return amount(value);
     }
   }
 });
 
-x(uri, 'body', [{
-  pageRequest: '.module_pagination li.active@text | trim',
-  itens: x('li.item', [{
-				id: 'a.OLXad-list-link@id',
-				url: 'a.OLXad-list-link@href',
-				value: 'p.OLXad-list-price',
-				title: 'h3.OLXad-list-title | trim',
-				detail: 'p.detail-specific | trim',
-				region: 'p.detail-region | trim'
-		 }])
-}])
-// (function(err, obj) {
+var gerarCrawlerData = function(){
 
-// 	if(err != null){
-// 		console.log(err);
-// 	}
+  var id = "[" + Date.now() + "]";
 
-// 	console.log('crawler finalizado!');
-// })
-.paginate('.next a.link@href')
-.limit(2)
-.write('results.json');
+  console.log(id + 'Crawler executando..');
+
+  x(uri, '#main-ad-list li.item', [{
+          id: 'a.OLXad-list-link@id | number',
+          url: 'a.OLXad-list-link@href',
+          amount: 'p.OLXad-list-price | amount',
+          tags: ['.OLXad-list-line-2 p | clearString']
+  }])
+  (function(err, obj) {
+
+    if (err){ 
+      console.log(id + 'Crawler erro: ');
+      console.log(err);
+    }
+
+    gravarCrawlerData(obj);
+
+    console.log(id + 'Crawler finalizado com sucesso, itens obtidos: ' + obj.length);
+
+  })
+  .paginate('.next a.link@href');
+//  .limit(2);
+
+}
+
+var gravarCrawlerData = function(obj){
+  fs.writeFile(fileName, JSON.stringify(obj), 'utf8'); 
+}
+
+var clearString = function(value){
+  return (typeof value === 'string' ? value.trim().replace(/[\n\t\r]/g,"") : value);
+} 
+
+var number = function(value){
+  return (value != null ? Number(value) : value);
+} 
+
+var amount = function(value){
+  return number(clearString(value.replace("R$","").replace(".","").replace(",",".").trim()));
+}
+
+module.exports = gerarCrawlerData;
