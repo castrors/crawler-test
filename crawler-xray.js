@@ -19,6 +19,22 @@ const x = Xray({
   }
 });
 
+var gravarCrawlerData = function(obj){
+  fs.writeFile(fileName, JSON.stringify(obj), 'utf8'); 
+}
+
+var clearString = function(value){
+  return (typeof value === 'string' ? value.trim().replace(/[\n\t\r]/g,"") : value);
+} 
+
+var number = function(value){
+  return (value != null ? Number(value) : value);
+} 
+
+var amount = function(value){
+  return number(clearString(value.replace("R$","").replace(".","").replace(",",".").trim()));
+}
+
 var gerarCrawlerData = function(){
 
   var id = "[" + Date.now() + "]";
@@ -48,20 +64,7 @@ var gerarCrawlerData = function(){
 
 }
 
-var gravarCrawlerData = function(obj){
-  fs.writeFile(fileName, JSON.stringify(obj), 'utf8'); 
-}
-
-var clearString = function(value){
-  return (typeof value === 'string' ? value.trim().replace(/[\n\t\r]/g,"") : value);
-} 
-
-var number = function(value){
-  return (value != null ? Number(value) : value);
-} 
-
-var amount = function(value){
-  return number(clearString(value.replace("R$","").replace(".","").replace(",",".").trim()));
-}
+//Ao iniciar ja executa o gerar, para executar apenas via comando do server basta comentar esta chamada
+gerarCrawlerData();
 
 module.exports = gerarCrawlerData;
