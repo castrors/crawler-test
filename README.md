@@ -4,7 +4,6 @@ Crawler implementado em node-js.
 Para testar basta instalar os modulos dependentes: 
 
   npm install x-ray
-  
   npm install superagent-charset
 
 Após, para subir o microservice: 
